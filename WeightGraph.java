@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+@SuppressWarnings("unchecked")
 public class WeightGraph {
 	Graph<String, Integer> sGraph;
 
