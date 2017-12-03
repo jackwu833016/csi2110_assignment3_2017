@@ -1,9 +1,10 @@
+package src;
+
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
-import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
@@ -16,7 +17,9 @@ public class ParisMetro {
     }
         
     /**
+     * @param fileName
      * @return StringArray
+     * @throws java.io.IOException
      */
     protected ArrayList<String> getStopInfoArray(String fileName) throws IOException {
 
@@ -44,9 +47,8 @@ public class ParisMetro {
         return stopNameList;
     }
 		
-    public static void main (String[] args){
-        ParisMetro PM = new ParisMetro();
-
-        PM.getStopInfoArray(args.toString());
+    public static void main (String[] args) throws Exception{
+        ParisMetro PM = new ParisMetro("");
+        PM.getStopInfoArray("metro.txt");
     }
 }
