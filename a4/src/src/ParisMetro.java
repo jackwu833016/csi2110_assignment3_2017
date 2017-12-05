@@ -5,11 +5,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.HashMap;
+import net.datastructures.AdjacencyMapGraph;
+import net.datastructures.Graph;
+import net.datastructures.Vertex;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
     
     private int totalVertices = 0;
+    private int totalEdges = 0;
     private ArrayList<String> stopsInfo;
     private BufferedReader fileReader;
     
@@ -19,6 +24,7 @@ public class ParisMetro {
         getStopInfoArray(fileName); //Allows one to read the .txt file
     }
         
+    // --- Graph generation ---
     /** 
      * Read metro.txt and retun an array containning all the stops 
      * @param filePath
@@ -43,20 +49,24 @@ public class ParisMetro {
                 String stopName = String.join(" ", Name_chunk);
                                 
                 stopNameList.add(stopName); //Adds the 2nd half of the string into the arraylist. For example, if text is 0000 hello, then only "hello" is stored in the ArrayList
-                
-                System.out.println(stopName);
-                
+                               
                 readInLine = fileReader.readLine(); //String reading
+                
+//                System.out.println(stopName);
             }
 
         }catch (IOException exception){
-            System.out.println("Error occur: " + exception.toString());
+//            System.out.println("Error occur: " + exception.toString());
         }
         
         totalVertices = stopNameList.size(); //save nums of stop
         return stopNameList;
     }
     
+    /**
+     * read in edges and save in int 2D array
+     * @throws IOException 
+     */
     protected void popularVerticesArray() throws IOException{
         String readInLine = "";
 
@@ -71,8 +81,7 @@ public class ParisMetro {
             
             //populate it
             vertices[from][to] = weight;
-            
-            System.out.println(from + " -> " + to + " | " + weight);
+//            System.out.println(from + " -> " + to + " | " + weight);
         }
     }
     
@@ -80,9 +89,70 @@ public class ParisMetro {
         stopsInfo = this.getStopInfoArray(filePath);
         this.popularVerticesArray();        
     }
+    
+    /**
+     * printout our 2D array in human readable format
+     */
+    protected void printTable(){
+       for(int row_count = 0; row_count < vertices.length; row_count++){
+           for(int col_count = 0; col_count < vertices[row_count].length; col_count++){
+               System.out.print(vertices[row_count][col_count] + "|");
+           }
+           System.out.println();
+       }
+    }
+    
+    // --- Graph operation ---
+    /**
+     * generate weight graph from int 2D array
+     * @return 
+     */
+    protected Graph<String,Integer> generateGraph(){
+         Graph<String,Integer> graph = new AdjacencyMapGraph<>(true);
+         
+        // now create vertices (in alphabetical order)
+        //reference from net.datastructure.GraphExamples
+        HashMap<String, Vertex<String> > verts = new HashMap<>();
+        
+        //insert all vertices into graph
+        for (int stop_num = 0; stop_num < vertices.length; stop_num++){
+            verts.put(
+                    String.valueOf(stop_num), 
+                    graph.insertVertex(String.valueOf(stop_num))
+            );
+        }
+       
+        //insert edges into graph
+        for(int row_count = 0; row_count < vertices.length; row_count++){
+           for(int col_count = 0; col_count < vertices[row_count].length; col_count++){
+               String from_stop = String.valueOf(row_count);
+               String to_stop = String.valueOf(col_count);
+               int travel_time = vertices[row_count][col_count];
+               
+               if(!(from_stop == to_stop || travel_time == 0)){               
+                    graph.insertEdge(verts.get(from_stop), 
+                                     verts.get(to_stop), 
+                                     travel_time
+                    );
+
+                    totalEdges++;
+               }
+        
+           }
+        }
+        
+        return graph;
+    }
+    
+    /**
+     * run through all vertices, and return all the lines (stop numbers) as int array
+     * @return allLines
+     */
+//    protected int[] lineAnalyze(){
+//        
+//    }
 		
 
-        
     public static void main (String[] args) throws Exception{
         ParisMetro PM = new ParisMetro("");
         
@@ -90,5 +160,10 @@ public class ParisMetro {
         System.out.println("reading: " + metroTxt_path);
         
         PM.analyzeFile(metroTxt_path);
+        System.out.println("Graph generated");
+        
+        System.out.println(PM.generateGraph());
+        
+        System.out.println("Edges recorded: " + PM.totalEdges);
     }
 }
