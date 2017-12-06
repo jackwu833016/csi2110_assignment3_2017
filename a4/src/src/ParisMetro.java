@@ -5,20 +5,28 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
-import net.datastructures.AdjacencyMapGraph;
-import net.datastructures.Graph;
+import java.util.List;
 import net.datastructures.Vertex;
+import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
     
-    private int totalVertices = 0;
     private int totalEdges = 0;
-    private ArrayList<String> stopsInfo;
     private BufferedReader fileReader;
-    
+    private ArrayList<String> stopsInfo;
     private int[][] vertices = new int[377][377];
+    
+    //hashmap for storing vertex objects
+    private HashMap<String, Vertex<String> > verts = new HashMap<>();
+    Graph<String, DefaultWeightedEdge> graph = 
+            new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class); 
 		
     public ParisMetro (String fileName) throws Exception, IOException {
         getStopInfoArray(fileName); //Allows one to read the .txt file
@@ -59,7 +67,6 @@ public class ParisMetro {
 //            System.out.println("Error occur: " + exception.toString());
         }
         
-        totalVertices = stopNameList.size(); //save nums of stop
         return stopNameList;
     }
     
@@ -107,19 +114,16 @@ public class ParisMetro {
      * generate weight graph from int 2D array
      * @return 
      */
-    protected Graph<String,Integer> generateGraph(){
-         Graph<String,Integer> graph = new AdjacencyMapGraph<>(true);
-         
-        // now create vertices (in alphabetical order)
-        //reference from net.datastructure.GraphExamples
-        HashMap<String, Vertex<String> > verts = new HashMap<>();
-        
+    protected void generateGraph(){
+               
         //insert all vertices into graph
         for (int stop_num = 0; stop_num < vertices.length; stop_num++){
-            verts.put(
-                    String.valueOf(stop_num), 
-                    graph.insertVertex(String.valueOf(stop_num))
-            );
+//            Vertex<String> new_vertex = new String();
+            graph.addVertex(String.valueOf(stop_num));
+//            verts.put(
+//                    String.valueOf(stop_num), 
+//                    new_vertex
+//            );
         }
        
         //insert edges into graph
@@ -129,41 +133,143 @@ public class ParisMetro {
                String to_stop = String.valueOf(col_count);
                int travel_time = vertices[row_count][col_count];
                
-               if(!(from_stop == to_stop || travel_time == 0)){               
-                    graph.insertEdge(verts.get(from_stop), 
-                                     verts.get(to_stop), 
-                                     travel_time
-                    );
+               
+               if(from_stop != to_stop && travel_time != 0){  
+                    if(travel_time < 0) travel_time = 0;
+                    
+                    DefaultWeightedEdge new_edge = graph.addEdge(from_stop, to_stop); 
+                    graph.setEdgeWeight(new_edge, travel_time); 
 
                     totalEdges++;
                }
         
            }
         }
-        
-        return graph;
     }
     
     /**
      * run through all vertices, and return all the lines (stop numbers) as int array
      * @return allLines
      */
-//    protected int[] lineAnalyze(){
-//        
-//    }
+    protected int[] lineAnalyze(Graph graph){
+        int[] foundLines = new int[10];
+        
+        //waiting to be impletemented
+        
+        return foundLines;
+    }
+    
+    /**
+     * find the shortest path between two input stops
+     * print out path and total travel time
+     * @param from_num
+     * @param to_num 
+     * @param remove_stop_num
+     */
+    protected void printShortestPathBetween(int from_stop_num, int to_stop_num, int remove_stop_num){
+        String from_stop = String.valueOf(from_stop_num);
+        String to_stop = String.valueOf(to_stop_num);
+        String remove_stop = String.valueOf(remove_stop_num);
+                
+        DijkstraShortestPath<String, DefaultWeightedEdge> path_finder = 
+                new DijkstraShortestPath<String, DefaultWeightedEdge>(graph);
+        
+        graph.removeVertex(remove_stop);
+        
+        GraphPath<String, DefaultWeightedEdge> shortest_path = 
+                path_finder.getPath(from_stop, to_stop);
+        
+        List<DefaultWeightedEdge> sub_paths = shortest_path.getEdgeList();
+        
+        double total_travel_time = 0;
+        
+        System.out.print("Path: " + from_stop);
+        for(DefaultWeightedEdge sub_path: sub_paths){
+            
+            if(sub_path.getWeight() == 0.0){ total_travel_time += 90; }
+            else{total_travel_time += sub_path.getWeight();}
+            
+            System.out.print( " " + sub_path.getTarget());
+            
+//            System.out.println(
+//                    sub_path.getSource().toString() + 
+//                    ":" + 
+//                    sub_path.getWeight() + 
+//                    ":" +
+//                    sub_path.getTarget().toString() + 
+//                    " -> "
+//                );
+        }
+        
+        System.out.println();
+        System.out.println("Time: " + total_travel_time);
+        
+    }
+
+    protected void printShortestPathBetween(int from_stop_num, int to_stop_num){
+        String from_stop = String.valueOf(from_stop_num);
+        String to_stop = String.valueOf(to_stop_num);
+                
+        DijkstraShortestPath<String, DefaultWeightedEdge> path_finder = 
+                new DijkstraShortestPath<String, DefaultWeightedEdge>(graph);
+        
+        GraphPath<String, DefaultWeightedEdge> shortest_path = 
+                path_finder.getPath(from_stop, to_stop);
+        
+        List<DefaultWeightedEdge> sub_paths = shortest_path.getEdgeList();
+        
+        double total_travel_time = 0;
+        
+        System.out.print("Path: " + from_stop);
+        for(DefaultWeightedEdge sub_path: sub_paths){
+            
+            if(sub_path.getWeight() == 0.0){ total_travel_time += 90; }
+            else{total_travel_time += sub_path.getWeight();}
+            
+            System.out.print( " " + sub_path.getTarget());
+            
+//            System.out.println(
+//                    sub_path.getSource().toString() + 
+//                    ":" + 
+//                    sub_path.getWeight() + 
+//                    ":" +
+//                    sub_path.getTarget().toString() + 
+//                    " -> "
+//                );
+        }
+        
+        System.out.println();
+        System.out.println("Time: " + total_travel_time);
+        
+    }
 		
 
     public static void main (String[] args) throws Exception{
         ParisMetro PM = new ParisMetro("");
         
         String metroTxt_path = "C:/Users/Jack's acer/OneDrive/University/2017 - 2018/CSI 2110/assignments/Assignment 4/csi2110_assignment4_2017/a4/src/src/metro.txt";
-        System.out.println("reading: " + metroTxt_path);
-        
         PM.analyzeFile(metroTxt_path);
-        System.out.println("Graph generated");
+        PM.generateGraph();
         
-        System.out.println(PM.generateGraph());
-        
-        System.out.println("Edges recorded: " + PM.totalEdges);
+        switch(args.length){
+            case 1:
+                System.out.println("Not supported");
+            break;
+            
+            case 2:
+                PM.printShortestPathBetween(
+                        Integer.valueOf(args[0]), 
+                        Integer.valueOf(args[1])
+                );
+            break;
+            
+            case 3:
+                PM.printShortestPathBetween(
+                        Integer.valueOf(args[0]), 
+                        Integer.valueOf(args[1]),
+                        Integer.valueOf(args[2])
+                );
+            break;
+        }        
     }
 }
