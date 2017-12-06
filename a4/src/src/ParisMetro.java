@@ -6,19 +6,27 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
+
 import net.datastructures.AdjacencyMapGraph;
+import net.datastructures.Entry;
 import net.datastructures.Graph;
+import net.datastructures.GraphAlgorithms;
+import net.datastructures.Map;
 import net.datastructures.Vertex;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
     
-    private int totalVertices = 0;
     private int totalEdges = 0;
-    private ArrayList<String> stopsInfo;
     private BufferedReader fileReader;
-    
+    private ArrayList<String> stopsInfo;
     private int[][] vertices = new int[377][377];
+    
+    //hashmap for storing vertex objects
+    private HashMap<String, Vertex<String> > verts = new HashMap<>();
+    Graph<String,Integer> graph = new AdjacencyMapGraph<>(true);
+
 		
     public ParisMetro (String fileName) throws Exception, IOException {
         getStopInfoArray(fileName); //Allows one to read the .txt file
@@ -59,7 +67,6 @@ public class ParisMetro {
 //            System.out.println("Error occur: " + exception.toString());
         }
         
-        totalVertices = stopNameList.size(); //save nums of stop
         return stopNameList;
     }
     
@@ -107,13 +114,8 @@ public class ParisMetro {
      * generate weight graph from int 2D array
      * @return 
      */
-    protected Graph<String,Integer> generateGraph(){
-         Graph<String,Integer> graph = new AdjacencyMapGraph<>(true);
-         
-        // now create vertices (in alphabetical order)
-        //reference from net.datastructure.GraphExamples
-        HashMap<String, Vertex<String> > verts = new HashMap<>();
-        
+    protected void generateGraph(){
+               
         //insert all vertices into graph
         for (int stop_num = 0; stop_num < vertices.length; stop_num++){
             verts.put(
@@ -129,7 +131,7 @@ public class ParisMetro {
                String to_stop = String.valueOf(col_count);
                int travel_time = vertices[row_count][col_count];
                
-               if(!(from_stop == to_stop || travel_time == 0)){               
+               if(!(from_stop == to_stop || travel_time == 0)){        
                     graph.insertEdge(verts.get(from_stop), 
                                      verts.get(to_stop), 
                                      travel_time
@@ -140,30 +142,61 @@ public class ParisMetro {
         
            }
         }
-        
-        return graph;
     }
     
     /**
      * run through all vertices, and return all the lines (stop numbers) as int array
      * @return allLines
      */
-//    protected int[] lineAnalyze(){
-//        
-//    }
+    protected int[] lineAnalyze(Graph graph){
+        int[] foundLines = new int[10];
+        
+        //waiting to be impletemented
+        
+        return foundLines;
+    }
+    
+    /**
+     * find the shortest path between two input stops
+     * print out path and total travel time
+     * @param from_num
+     * @param to_num 
+     */
+    protected void printShortestPathBetween(int from_num, int to_num){
+        Vertex target_stop = verts.get(String.valueOf(to_num));
+        
+        Map<Vertex<String>, Integer> path = GraphAlgorithms.shortestPathLengths(
+            graph, verts.get(String.valueOf(from_num))
+        );
+        
+        for(Entry<Vertex<String>,Integer> stop: path.entrySet()){
+            Vertex temp_vertex = stop.getKey();
+            
+            if(target_stop.equals(temp_vertex)) //found the target stop
+                System.out.println("Travel time: " + stop.getValue());
+
+        }
+    }
 		
 
     public static void main (String[] args) throws Exception{
         ParisMetro PM = new ParisMetro("");
+        Graph<String,Integer> metroGraph;
         
         String metroTxt_path = "C:/Users/Jack's acer/OneDrive/University/2017 - 2018/CSI 2110/assignments/Assignment 4/csi2110_assignment4_2017/a4/src/src/metro.txt";
         System.out.println("reading: " + metroTxt_path);
         
         PM.analyzeFile(metroTxt_path);
+        PM.generateGraph();
         System.out.println("Graph generated");
         
-        System.out.println(PM.generateGraph());
+        //print out all vertexies
+//        System.out.println(metroGraph);
         
-        System.out.println("Edges recorded: " + PM.totalEdges);
+//        PM.lineAnalyze(metroGraph);
+        
+        //find shortest path between
+        PM.printShortestPathBetween(10, 200);
+
     }
 }
