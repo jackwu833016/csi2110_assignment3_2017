@@ -6,14 +6,26 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Set;
 
 import net.datastructures.AdjacencyMapGraph;
+import net.datastructures.Edge;
 import net.datastructures.Entry;
-import net.datastructures.Graph;
+//import net.datastructures.Graph;
 import net.datastructures.GraphAlgorithms;
+import net.datastructures.List;
 import net.datastructures.Map;
+import net.datastructures.PositionalList;
+import net.datastructures.Queue;
 import net.datastructures.Vertex;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
@@ -25,8 +37,8 @@ public class ParisMetro {
     
     //hashmap for storing vertex objects
     private HashMap<String, Vertex<String> > verts = new HashMap<>();
-    Graph<String,Integer> graph = new AdjacencyMapGraph<>(true);
-
+    DirectedGraph<Vertex<String>, Integer> graph =
+                new DefaultDirectedGraph<Vertex<String>, Integer>(Integer.class);
 		
     public ParisMetro (String fileName) throws Exception, IOException {
         getStopInfoArray(fileName); //Allows one to read the .txt file
@@ -118,9 +130,11 @@ public class ParisMetro {
                
         //insert all vertices into graph
         for (int stop_num = 0; stop_num < vertices.length; stop_num++){
+            Vertex<String> new_vertex = new Vertex;
+            
             verts.put(
                     String.valueOf(stop_num), 
-                    graph.insertVertex(String.valueOf(stop_num))
+                    new_vertex
             );
         }
        
@@ -132,9 +146,10 @@ public class ParisMetro {
                int travel_time = vertices[row_count][col_count];
                
                if(!(from_stop == to_stop || travel_time == 0)){        
-                    graph.insertEdge(verts.get(from_stop), 
-                                     verts.get(to_stop), 
-                                     travel_time
+                    graph.addEdge(  
+                            verts.get(from_stop), 
+                            verts.get(to_stop), 
+                            travel_time
                     );
 
                     totalEdges++;
@@ -164,18 +179,20 @@ public class ParisMetro {
      */
     protected void printShortestPathBetween(int from_num, int to_num){
         Vertex target_stop = verts.get(String.valueOf(to_num));
+        Vertex from_stop = verts.get(String.valueOf(from_num));
         
-        Map<Vertex<String>, Integer> path = GraphAlgorithms.shortestPathLengths(
-            graph, verts.get(String.valueOf(from_num))
-        );
+        DijkstraShortestPath DSP = new DijkstraShortestPath(graph);
         
-        for(Entry<Vertex<String>,Integer> stop: path.entrySet()){
-            Vertex temp_vertex = stop.getKey();
-            
-            if(target_stop.equals(temp_vertex)) //found the target stop
-                System.out.println("Travel time: " + stop.getValue());
-
-        }
+//        Map<Vertex<String>, Integer> path = GraphAlgorithms.shortestPathLengths(
+//            graph, verts.get(String.valueOf(from_num))
+//        );
+//        
+//        for(Entry<Vertex<String>,Integer> stop: path.entrySet()){
+//            Vertex temp_vertex = stop.getKey();
+//            
+//            if(target_stop.equals(temp_vertex)) //found the target stop
+//                System.out.println("Travel time: " + stop.getValue());
+//        }
     }
 		
 
