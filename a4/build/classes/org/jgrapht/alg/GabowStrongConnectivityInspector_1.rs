@@ -1,0 +1,2 @@
+VertexNumber
+org.jgrapht.alg.GabowStrongConnectivityInspector

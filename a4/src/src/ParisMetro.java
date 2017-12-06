@@ -6,26 +6,14 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Set;
-
-import net.datastructures.AdjacencyMapGraph;
-import net.datastructures.Edge;
-import net.datastructures.Entry;
-//import net.datastructures.Graph;
-import net.datastructures.GraphAlgorithms;
-import net.datastructures.List;
-import net.datastructures.Map;
-import net.datastructures.PositionalList;
-import net.datastructures.Queue;
+import java.util.List;
 import net.datastructures.Vertex;
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 @SuppressWarnings("unchecked")
 public class ParisMetro {
@@ -37,8 +25,8 @@ public class ParisMetro {
     
     //hashmap for storing vertex objects
     private HashMap<String, Vertex<String> > verts = new HashMap<>();
-    DirectedGraph<Vertex<String>, Integer> graph =
-                new DefaultDirectedGraph<Vertex<String>, Integer>(Integer.class);
+    Graph<String, DefaultWeightedEdge> graph = 
+            new SimpleDirectedWeightedGraph<String, DefaultWeightedEdge>(DefaultWeightedEdge.class); 
 		
     public ParisMetro (String fileName) throws Exception, IOException {
         getStopInfoArray(fileName); //Allows one to read the .txt file
@@ -130,12 +118,12 @@ public class ParisMetro {
                
         //insert all vertices into graph
         for (int stop_num = 0; stop_num < vertices.length; stop_num++){
-            Vertex<String> new_vertex = new Vertex;
-            
-            verts.put(
-                    String.valueOf(stop_num), 
-                    new_vertex
-            );
+//            Vertex<String> new_vertex = new String();
+            graph.addVertex(String.valueOf(stop_num));
+//            verts.put(
+//                    String.valueOf(stop_num), 
+//                    new_vertex
+//            );
         }
        
         //insert edges into graph
@@ -145,12 +133,12 @@ public class ParisMetro {
                String to_stop = String.valueOf(col_count);
                int travel_time = vertices[row_count][col_count];
                
-               if(!(from_stop == to_stop || travel_time == 0)){        
-                    graph.addEdge(  
-                            verts.get(from_stop), 
-                            verts.get(to_stop), 
-                            travel_time
-                    );
+               
+               if(from_stop != to_stop && travel_time != 0){  
+                    if(travel_time < 0) travel_time = 0;
+                    
+                    DefaultWeightedEdge new_edge = graph.addEdge(from_stop, to_stop); 
+                    graph.setEdgeWeight(new_edge, travel_time); 
 
                     totalEdges++;
                }
@@ -176,23 +164,83 @@ public class ParisMetro {
      * print out path and total travel time
      * @param from_num
      * @param to_num 
+     * @param remove_stop_num
      */
-    protected void printShortestPathBetween(int from_num, int to_num){
-        Vertex target_stop = verts.get(String.valueOf(to_num));
-        Vertex from_stop = verts.get(String.valueOf(from_num));
+    protected void printShortestPathBetween(int from_stop_num, int to_stop_num, int remove_stop_num){
+        String from_stop = String.valueOf(from_stop_num);
+        String to_stop = String.valueOf(to_stop_num);
+        String remove_stop = String.valueOf(remove_stop_num);
+                
+        DijkstraShortestPath<String, DefaultWeightedEdge> path_finder = 
+                new DijkstraShortestPath<String, DefaultWeightedEdge>(graph);
         
-        DijkstraShortestPath DSP = new DijkstraShortestPath(graph);
+        graph.removeVertex(remove_stop);
         
-//        Map<Vertex<String>, Integer> path = GraphAlgorithms.shortestPathLengths(
-//            graph, verts.get(String.valueOf(from_num))
-//        );
-//        
-//        for(Entry<Vertex<String>,Integer> stop: path.entrySet()){
-//            Vertex temp_vertex = stop.getKey();
-//            
-//            if(target_stop.equals(temp_vertex)) //found the target stop
-//                System.out.println("Travel time: " + stop.getValue());
-//        }
+        GraphPath<String, DefaultWeightedEdge> shortest_path = 
+                path_finder.getPath(from_stop, to_stop);
+        
+        List<DefaultWeightedEdge> sub_paths = shortest_path.getEdgeList();
+        
+        double total_travel_time = 0;
+        
+        System.out.print("Path: " + from_stop);
+        for(DefaultWeightedEdge sub_path: sub_paths){
+            
+            if(sub_path.getWeight() == 0.0){ total_travel_time += 90; }
+            else{total_travel_time += sub_path.getWeight();}
+            
+            System.out.print( " " + sub_path.getTarget());
+            
+//            System.out.println(
+//                    sub_path.getSource().toString() + 
+//                    ":" + 
+//                    sub_path.getWeight() + 
+//                    ":" +
+//                    sub_path.getTarget().toString() + 
+//                    " -> "
+//                );
+        }
+        
+        System.out.println();
+        System.out.println("Time: " + total_travel_time);
+        
+    }
+
+    protected void printShortestPathBetween(int from_stop_num, int to_stop_num){
+        String from_stop = String.valueOf(from_stop_num);
+        String to_stop = String.valueOf(to_stop_num);
+                
+        DijkstraShortestPath<String, DefaultWeightedEdge> path_finder = 
+                new DijkstraShortestPath<String, DefaultWeightedEdge>(graph);
+        
+        GraphPath<String, DefaultWeightedEdge> shortest_path = 
+                path_finder.getPath(from_stop, to_stop);
+        
+        List<DefaultWeightedEdge> sub_paths = shortest_path.getEdgeList();
+        
+        double total_travel_time = 0;
+        
+        System.out.print("Path: " + from_stop);
+        for(DefaultWeightedEdge sub_path: sub_paths){
+            
+            if(sub_path.getWeight() == 0.0){ total_travel_time += 90; }
+            else{total_travel_time += sub_path.getWeight();}
+            
+            System.out.print( " " + sub_path.getTarget());
+            
+//            System.out.println(
+//                    sub_path.getSource().toString() + 
+//                    ":" + 
+//                    sub_path.getWeight() + 
+//                    ":" +
+//                    sub_path.getTarget().toString() + 
+//                    " -> "
+//                );
+        }
+        
+        System.out.println();
+        System.out.println("Time: " + total_travel_time);
+        
     }
 		
 
@@ -207,13 +255,8 @@ public class ParisMetro {
         PM.generateGraph();
         System.out.println("Graph generated");
         
-        //print out all vertexies
-//        System.out.println(metroGraph);
-        
-//        PM.lineAnalyze(metroGraph);
-        
         //find shortest path between
-        PM.printShortestPathBetween(10, 200);
+        PM.printShortestPathBetween(35, 282, 22);
 
     }
 }

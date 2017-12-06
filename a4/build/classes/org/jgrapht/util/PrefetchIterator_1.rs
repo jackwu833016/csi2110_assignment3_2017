@@ -1,0 +1,2 @@
+NextElementFunctor
+org.jgrapht.util.PrefetchIterator

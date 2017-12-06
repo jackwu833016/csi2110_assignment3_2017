@@ -1,0 +1,3 @@
+FlyweightVertexEvent
+FlyweightEdgeEvent
+org.jgrapht.traverse.AbstractGraphIterator

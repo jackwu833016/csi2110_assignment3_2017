@@ -1,0 +1,1 @@
+org.jgrapht.alg.isomorphism.VF2AbstractIsomorphismInspector
