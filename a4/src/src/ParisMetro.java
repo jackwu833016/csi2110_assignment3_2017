@@ -22,6 +22,7 @@ public class ParisMetro {
     private BufferedReader fileReader;
     private ArrayList<String> stopsInfo;
     private int[][] vertices = new int[377][377];
+    private ArrayList<String> stopNameList = new ArrayList<String>(500);                   
     
     //hashmap for storing vertex objects
     private HashMap<String, Vertex<String> > verts = new HashMap<>();
@@ -41,7 +42,6 @@ public class ParisMetro {
      */
     protected ArrayList<String> getStopInfoArray(String filePath) throws IOException {
 
-        ArrayList<String> stopNameList = new ArrayList<String>(500);                   
         String readInLine = "";
 
         try{
@@ -251,9 +251,15 @@ public class ParisMetro {
         PM.analyzeFile(metroTxt_path);
         PM.generateGraph();
         
+        System.out.print("Inputs: ");
+        for(int input_counter = 0; input_counter < args.length; input_counter++){
+            System.out.print(args[input_counter] + " ");
+        }
+        System.out.println();
+        
         switch(args.length){
             case 1:
-                System.out.println("Not supported");
+                System.out.println("Stop Name: " + PM.stopNameList.get(Integer.valueOf(args[0])));
             break;
             
             case 2:
