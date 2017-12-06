@@ -5,13 +5,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import net.datastructures.Vertex;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
@@ -246,17 +246,30 @@ public class ParisMetro {
 
     public static void main (String[] args) throws Exception{
         ParisMetro PM = new ParisMetro("");
-        Graph<String,Integer> metroGraph;
         
         String metroTxt_path = "C:/Users/Jack's acer/OneDrive/University/2017 - 2018/CSI 2110/assignments/Assignment 4/csi2110_assignment4_2017/a4/src/src/metro.txt";
-        System.out.println("reading: " + metroTxt_path);
-        
         PM.analyzeFile(metroTxt_path);
         PM.generateGraph();
-        System.out.println("Graph generated");
         
-        //find shortest path between
-        PM.printShortestPathBetween(35, 282, 22);
-
+        switch(args.length){
+            case 1:
+                System.out.println("Not supported");
+            break;
+            
+            case 2:
+                PM.printShortestPathBetween(
+                        Integer.valueOf(args[0]), 
+                        Integer.valueOf(args[1])
+                );
+            break;
+            
+            case 3:
+                PM.printShortestPathBetween(
+                        Integer.valueOf(args[0]), 
+                        Integer.valueOf(args[1]),
+                        Integer.valueOf(args[2])
+                );
+            break;
+        }        
     }
 }
